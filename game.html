@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- imports for the game -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeaSlug</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- setup screen -->
+    <div id="setup-screen" class="screen active-screen">
+        <div class="glass-panel">
+            <img src="sea_slug.jpg" alt="Sea Slug Mascot" class="mascot-img">
+            <h1>*Sea Slug*: Match Maker</h1>
+            <!-- load from memory -->
+            <div id="memory-panel" class="memory-panel">
+                <div class="memory-badge">Memory bank active</div>
+                <p>Previous session found (<span id="mem-count">0</span> pairs).</p>
+                <p id="mem-score" class="last-score"></p>
+                <button class="btn" style="background: rgba(255,255,255,0.9); color: #333;" onclick="startFromMemory()">Resume previous session</button>
+            </div>
+
+            <p>Upload a list of questions with paired answers. Each question should be on a new line in the questions TXT file, and the corresponding answer should be on the same line in the answers TXT file.</p>
+
+            <div class="file-input-group">
+                <div>
+                    <label>Questions File (Please use ".txt")</label>
+                    <input type="file" id="questions-file" accept=".txt">
+                </div>
+                <div>
+                    <label>Answers File (Please use ".txt")</label>
+                    <input type="file" id="answers-file" accept=".txt">
+                </div>
+            </div>
+            
+            <button class="btn" onclick="startFromFiles()">Start</button>
+            <p id="error-msg" style="color: var(--accent-red); margin-top: 15px; font-size: 0.8rem; display: none;"></p>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div class="hud">
+            <div class="stat-box">Time: <span id="timer">00:00</span></div>
+            <div class="stat-box">Correct: <span id="score-correct" class="correct">0</span></div>
+            <div class="stat-box">Mistakes: <span id="score-wrong" class="wrong">0</span></div>
+        </div>
+        <div class="game-board" id="board">
+            </div>
+    </div>
+
+    <div id="end-screen" class="screen">
+        <div class="glass-panel">
+            <h1>System synced</h1>
+            <p>Training complete.</p>
+            <h2 id="final-time" style="margin-bottom: 10px;">00:00</h2>
+            <p>Final score: <span id="final-score" class="correct"></span> | Mistakes: <span id="final-mistakes" class="wrong"></span></p>
+            <button class="btn" onclick="location.reload()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let questions = [];
+        let answers = [];
+        let cards = [];
+        let firstCard = null;
+        let lockBoard = false;
+        let correctMatches = 0;
+        let mistakes = 0;
+        let timerInterval;
+        let seconds = 0;
+        let totalPairs = 0;
+
+        // DOM Elements
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const board = document.getElementById('board');
+        const errorMsg = document.getElementById('error-msg');
+        const memoryPanel = document.getElementById('memory-panel');
+
+        // check memory after loading
+        window.onload = function() {
+            const storedQ = localStorage.getItem('ssmm_q');
+            const storedA = localStorage.getItem('ssmm_a');
+            const storedScore = localStorage.getItem('ssmm_last_score');
+
+            if (storedQ && storedA) {
+                const qArr = JSON.parse(storedQ);
+                memoryPanel.style.display = 'block';
+                document.getElementById('mem-count').innerText = qArr.length;
+                
+                if (storedScore) {
+                    const scoreData = JSON.parse(storedScore);
+                    document.getElementById('mem-score').innerHTML = 
+                        `Last Run: <b>${scoreData.time}</b> with <b>${scoreData.mistakes}</b> mistakes.`;
+                } else {
+                    document.getElementById('mem-score').innerText = "No previous score recorded.";
+                }
+            }
+        };
+
+        // File Reader Helper
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result.split('\n').filter(line => line.trim() !== ''));
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        // --- NEW: START FROM MEMORY ---
+        function startFromMemory() {
+            try {
+                questions = JSON.parse(localStorage.getItem('ssmm_q'));
+                answers = JSON.parse(localStorage.getItem('ssmm_a'));
+                initializeGameLogic();
+            } catch (e) {
+                showError("Memory corrupted. Please upload files again.");
+                localStorage.clear();
+            }
+        }
+
+        // --- MODIFIED: START FROM FILES ---
+        async function startFromFiles() {
+            const qFile = document.getElementById('questions-file').files[0];
+            const aFile = document.getElementById('answers-file').files[0];
+
+            if (!qFile || !aFile) {
+                showError("Please upload both Question and Answer files.");
+                return;
+            }
+
+            try {
+                questions = await readFile(qFile);
+                answers = await readFile(aFile);
+
+                if (questions.length !== answers.length) {
+                    showError(`Mismatch! Found ${questions.length} questions and ${answers.length} answers.`);
+                    return;
+                }
+                if (questions.length === 0) {
+                    showError("Files appear to be empty.");
+                    return;
+                }
+
+                // SAVE TO MEMORY
+                localStorage.setItem('ssmm_q', JSON.stringify(questions));
+                localStorage.setItem('ssmm_a', JSON.stringify(answers));
+
+                initializeGameLogic();
+
+            } catch (err) {
+                showError("Error reading files. Please ensure they are plain text.");
+            }
+        }
+
+        // --- SHARED GAME LOGIC ---
+        function initializeGameLogic() {
+            totalPairs = questions.length;
+            generateCards();
+            setupScreen.classList.remove('active-screen');
+            gameScreen.classList.add('active-screen');
+            startTimer();
+        }
+
+        function showError(msg) {
+            errorMsg.innerText = msg;
+            errorMsg.style.display = 'block';
+        }
+
+        function generateCards() {
+            cards = [];
+            // Create pairs
+            for (let i = 0; i < questions.length; i++) {
+                // Question Card
+                cards.push({ id: i, type: 'q', text: questions[i] });
+                // Answer Card
+                cards.push({ id: i, type: 'a', text: answers[i] });
+            }
+
+            // Shuffle
+            cards.sort(() => 0.5 - Math.random());
+
+            // Render
+            board.innerHTML = '';
+            cards.forEach((cardData, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.classList.add('card');
+                
+                // --- NEW LINE: Adds the visual distinction class ---
+                cardEl.classList.add(cardData.type === 'q' ? 'type-q' : 'type-a');
+                // --------------------------------------------------
+
+                cardEl.innerText = cardData.text;
+                cardEl.dataset.id = cardData.id;
+                cardEl.dataset.index = index;
+                cardEl.addEventListener('click', flipCard);
+                board.appendChild(cardEl);
+            });
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return; 
+            this.classList.add('selected');
+            if (!firstCard) {
+                firstCard = this;
+                return;
+            }
+            checkForMatch(this);
+        }
+
+        function checkForMatch(secondCard) {
+            let isMatch = firstCard.dataset.id === secondCard.dataset.id;
+            if (isMatch) {
+                disableCards(secondCard);
+            } else {
+                unflipCards(secondCard);
+            }
+        }
+
+        function disableCards(secondCard) {
+            lockBoard = true;
+            firstCard.classList.add('match');
+            secondCard.classList.add('match');
+            firstCard.classList.remove('selected');
+            secondCard.classList.remove('selected');
+            correctMatches++;
+            document.getElementById('score-correct').innerText = correctMatches;
+            setTimeout(() => {
+                resetBoard();
+                checkWinCondition();
+            }, 600);
+        }
+
+        function unflipCards(secondCard) {
+            lockBoard = true;
+            mistakes++;
+            document.getElementById('score-wrong').innerText = mistakes;
+            firstCard.classList.add('error');
+            secondCard.classList.add('error');
+            setTimeout(() => {
+                firstCard.classList.remove('selected', 'error');
+                secondCard.classList.remove('selected', 'error');
+                resetBoard();
+            }, 1000); 
+        }
+
+        function resetBoard() {
+            [firstCard, lockBoard] = [null, false];
+        }
+
+        function checkWinCondition() {
+            if (correctMatches === totalPairs) {
+                clearInterval(timerInterval);
+                const finalTimeStr = document.getElementById('timer').innerText;
+
+                // --- NEW: SAVE SCORE ---
+                const scoreData = {
+                    time: finalTimeStr,
+                    mistakes: mistakes,
+                    date: new Date().toLocaleDateString()
+                };
+                localStorage.setItem('ssmm_last_score', JSON.stringify(scoreData));
+
+                setTimeout(() => {
+                    gameScreen.classList.remove('active-screen');
+                    endScreen.classList.add('active-screen');
+                    document.getElementById('final-time').innerText = finalTimeStr;
+                    document.getElementById('final-score').innerText = correctMatches;
+                    document.getElementById('final-mistakes').innerText = mistakes;
+                }, 500);
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('timer').innerText = 
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

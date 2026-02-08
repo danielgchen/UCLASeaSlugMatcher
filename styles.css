@@ -1,0 +1,249 @@
+:root {
+    --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text-color: #ffffff;
+    --accent-gold: #ffd700;
+    --accent-green: #00ff9d;
+    --accent-red: #ff4b4b;
+    --card-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+body {
+    font-family: var(--card-font);
+    background: var(--bg-gradient);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* --- UI Layers --- */
+.screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    animation: fadeIn 0.8s ease;
+}
+
+.active-screen { display: flex; }
+
+/* --- Glass Panels --- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    text-align: center;
+}
+
+h1 { font-weight: 200; letter-spacing: 4px; margin-bottom: 20px; text-transform: uppercase; }
+p { margin-bottom: 30px; opacity: 0.8; }
+
+/* --- Inputs --- */
+.file-input-group {
+    margin: 20px 0;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+input[type="file"] {
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    color: white;
+    cursor: pointer;
+}
+
+/* --- Buttons --- */
+.btn {
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    padding: 12px 40px;
+    font-size: 1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 20px;
+}
+
+.btn:hover {
+    background: white;
+    color: #24243e;
+    box-shadow: 0 0 15px rgba(255,255,255,0.5);
+}
+
+/* --- HUD --- */
+.hud {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.stat-box span { font-weight: bold; margin-left: 5px; }
+.wrong { color: var(--accent-red); }
+.correct { color: var(--accent-green); }
+
+/* --- Game Board --- */
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    width: 120%;
+    max-width: 1400px;
+    
+    /* SCROLL FIXES: */
+    max-height: 90vh;       /* Limits height so it fits on screen */
+    overflow-y: auto;       /* Enables vertical scrolling inside the box */
+    padding: 15px;          /* Adds breathing room for the scrollbar */
+    
+    /* Optional: Makes the scrollbar look nicer */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.5) transparent;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    text-align: center;
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* Questions: Cool Blue, Solid Border */
+.card.type-q {
+    border: 3px solid #4facfe;
+}
+
+/* Answers: Warm Orange, Dashed Border */
+.card.type-a {
+    border: 3px dashed #ff9966;
+}
+
+/* --- States --- */
+.card.selected {
+    border-color: var(--accent-gold) !important;
+    box-shadow: 0 0 15px var(--accent-gold), inset 0 0 10px rgba(255, 215, 0, 0.2);
+    color: var(--accent-gold);
+}
+
+.card.match {
+    border-color: var(--accent-green) !important;
+    background: var(--accent-green);
+    color: #000;
+    box-shadow: 0 0 25px var(--accent-green);
+    transform: scale(1.1);
+    opacity: 0; 
+    pointer-events: none;
+    transition: transform 0.4s ease, opacity 0.4s ease 0.2s; 
+}
+
+.card.error {
+    background: rgba(255, 75, 75, 0.2);
+    border-color: var(--accent-red) !important;
+    color: var(--accent-red);
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.memory-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: none; /* Hidden by default */
+}
+.memory-badge {
+    display: inline-block;
+    background: #4caf50;
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+.last-score {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 15px;
+}
+.divider {
+    height: 1px;
+    background: rgba(255,255,255,0.2);
+    margin: 25px 0;
+    width: 100%;
+}
+
+.mascot-img {
+    width: 200px;            /* Adjust size as needed */
+    height: auto;
+    margin-bottom: 15px;     /* Space between image and title */
+    border-radius: 50%;      /* Optional: Makes the image circular */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); /* Soft glow */
+    animation: float 6s ease-in-out infinite;      /* Gentle floating animation */
+}
+
+/* --- Animations --- */
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}

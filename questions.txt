@@ -1,0 +1,32 @@
+Clonidine
+Dobutamine
+Epinephrine
+Isoproterenol
+Midodrine
+Norepinephrine
+Oxymetazoline,
+Phenylephrine
+Phenoxybenzamine
+Phentolamine
+Terazosin
+Carvedilol
+Metoprolol
+Propranolol
+d-Amphetamine
+d-Methamphetamine
+Cocaine
+Ephedrine
+Pseudoephedrine
+Tyramine
+Reserpine
+Milrinone
+Amlodipine, Nifedipine
+Diltiazem, Verapamil
+Atropine
+Vasopressin
+Nitroglycerin
+Isosorbide- mononitrate
+Isosorbide-dinitrate
+Sodium Nitroprusside
+Hydralazine
+Digoxin

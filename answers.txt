@@ -1,0 +1,32 @@
+Selective α2 adrenergic partial agonist
+Selective β1 adrenergic agonist with weak β2 agonist activity;
+Alpha1,2 / beta1,2 adrenergic agonist
+Nonselective β receptor agonist;
+Selective α1 adrenergic receptor agonist (prodrug)
+Alpha1,2 / beta1 adrenergic receptor agonist
+alpha1,2 adrenergic receptor partial agonist
+Selective alpha1 adrenergic receptor agonist;
+Nonselective, irreversible alpha-adrenergic receptor- antagonist
+Non-selective, competitive (reversible) alpha- adrenergic receptor- antagonist
+Competitive alpha1- adrenergic receptor antagonist
+Nonselective beta- adrenergic receptor antagonist; also has alpha antagonist effects (beta effect >> alpha)
+Selective β1 adrenergic receptor antagonist
+Nonselective beta- adrenergic receptor antagonist
+Increases extracellular concentrations of catecholamines by 1) blocking their reuptake into presynaptic nerve terminal, and by 2) inducing their release; ; occurs both centrally and peripherally
+Increases extracellular concentrations of catecholamines and serotonin by inducing their release from presynaptic terminals, both in CNS and PNS
+Increases extracellular concentrations of catecholamines by blocking their reuptake from presynaptic terminal, CNS and PNS: stimulating all adrenergic receptor types; Can lead to vasoconstriction in vasculature Na+ channel blocker;
+Less potent analog of amphetamine; increase extracellular concentrations of catecholamines by blocking their reuptake from the synapse and inducing their release, both CNS and PNS; Direct agonist effects on post synaptic adrenergic receptors
+Has amphetamine-like properties at the noradrenergic terminal but less poten
+Metabolized by MAO (mostly MAO A) in periphery; if nonselective MAO inhibitor taken, then tyramine not metabolized and will be absorbed and taken up into presynaptic adrenergic terminals by NE transporters; tyramine then displaces NE from storage vesicles and NE is released
+Depletes norepinephrine, serotonin, and dopamine neuronal content by binding to VMAT2 with high affinity and irreversibly blocking uptake of he monoamines into secretory vesicles
+Phosphodiesterase-3 inhibitor
+Dihydropyridine calcium channel/receptor (DHPR) antagonist
+Non-dihydropyridine calcium channel/receptor antagonist
+Competitive inhibition of ACh at postganglionic cholinergic receptors; no actions at NMJ; has both PNS and CNS effects (i.e., can cross the BBB)
+Exogenous, parenteral form of antidiuretic hormone (ADH)
+Decreases preload via venodilation that leads to decreases in myocardial O₂ demand; also dilates coronary arteries and relieves coronary spasm
+Organic nitrate prodrug → bioactivated in vascular smooth muscle; releases NO → reduces preload by NO- mediated cGMP accumulation causing predominant venodilation
+(IV/PO/etc) Organic nitrate prodrug → bioactivated in vascular smooth muscle; releases NO → reduces preload by NO- mediated cGMP accumulation causing predominant venodilation
+Releases NO directly→ sGC → cGMP → smooth-muscle relaxation, causing rapid, balanced arterial and venous dilation; cyanide detoxified to thiocyanate
+Lowers blood pressure by directly dilating arterioles, reducing SVR and afterload, with reflex sympathetic activation
+Elevation of cytosolic Na+ concentration by partial suppression of Na+/K+ pump; elevates intracellular Ca2+ concentration via Na+/Ca2+ exchanger
