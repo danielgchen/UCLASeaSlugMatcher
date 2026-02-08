@@ -196,6 +196,7 @@
 
                 cardEl.innerText = cardData.text;
                 cardEl.dataset.id = cardData.id;
+                cardEl.dataset.type = cardData.type;
                 cardEl.dataset.index = index;
                 cardEl.addEventListener('click', flipCard);
                 board.appendChild(cardEl);
@@ -204,17 +205,40 @@
 
         function flipCard() {
             if (lockBoard) return;
-            if (this === firstCard) return; 
+
+            // --- NEW: DESELECT LOGIC ---
+            // If the user clicks the card that is already selected:
+            if (this === firstCard) {
+                this.classList.remove('selected'); // Remove the highlight
+                firstCard = null;                  // Reset the memory
+                return;                            // Stop here
+            }
+            // ---------------------------
+
             this.classList.add('selected');
+
             if (!firstCard) {
                 firstCard = this;
                 return;
             }
+
             checkForMatch(this);
         }
 
         function checkForMatch(secondCard) {
+            // --- NEW LOGIC: PREVENT SAME-TYPE SELECTION ---
+            if (firstCard.dataset.type === secondCard.dataset.type) {
+                // If both are Questions or both are Answers:
+                firstCard.classList.remove('selected');
+                secondCard.classList.remove('selected');
+                firstCard = null;
+                return; // Exit immediately (no error, no penalty)
+            }
+            // ----------------------------------------------
+
+            // Standard Match Logic
             let isMatch = firstCard.dataset.id === secondCard.dataset.id;
+
             if (isMatch) {
                 disableCards(secondCard);
             } else {
